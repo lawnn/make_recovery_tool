@@ -1,6 +1,6 @@
 #!/bin/bash
 echo "Would you mind picking an Device variant?"
-select choice in sc06d 
+select choice in sc06d sc04f
 do
 case "$choice" in
 	"sc06d")
@@ -10,6 +10,15 @@ case "$choice" in
                 KERNEL_RAMDISK_OFFSET=0x01500000
                 KERNEL_PAGESIZE=2048
                 IMG_MAX_SIZE=10485760
+		break;;
+	"sc04f")
+                TARGET_DEVICE=SC04F
+                KERNEL_CMDLINE="console=null androidboot.hardware=qcom user_debug=31 msm_rtb.filter=0x37 ehci-hcd.park=3"
+                KERNEL_BASEADDRESS=0x00000000
+                KERNEL_RAMDISK_OFFSET=0x02000000
+                KERNEL_TAGS_OFFSET=0x01e00000
+                KERNEL_PAGESIZE=2048
+                IMG_MAX_SIZE=15728640
 		break;;
 
 esac
@@ -70,11 +79,16 @@ make_recovery_image()
     ./release-tools/mkbootfs ${RAMDISK_TMP_DIR} > ${BIN_DIR}/ramdisk-${IMAGE_NAME}.cpio
     ./release-tools/minigzip < ${BIN_DIR}/ramdisk-${IMAGE_NAME}.cpio > ${BIN_DIR}/ramdisk-${IMAGE_NAME}.img
 #    lzma < ${BIN_DIR}/ramdisk-${IMAGE_NAME}.cpio > ${BIN_DIR}/ramdisk-${IMAGE_NAME}.img
-    ./release-tools/mkbootimg --cmdline "${KERNEL_CMDLINE} androidboot.selinux=permissive" --base ${KERNEL_BASEADDRESS} --pagesize ${KERNEL_PAGESIZE} --ramdisk_offset ${KERNEL_RAMDISK_OFFSET} --kernel ${BIN_DIR}/kernel --ramdisk ${BIN_DIR}/ramdisk-${IMAGE_NAME}.img --output ${BIN_DIR}/${IMAGE_NAME}.img
+    if [ -f release-tools/$TARGET_DEVICE/prebuild-img/dt.img ]; then
+      ./release-tools/mkbootimg --cmdline "${KERNEL_CMDLINE} androidboot.selinux=permissive" --base ${KERNEL_BASEADDRESS} --pagesize ${KERNEL_PAGESIZE} --ramdisk_offset ${KERNEL_RAMDISK_OFFSET} --tags_offset ${KERNEL_TAGS_OFFSET} --kernel ${BIN_DIR}/kernel --ramdisk ${BIN_DIR}/ramdisk-${IMAGE_NAME}.img --output  ${BIN_DIR}/${IMAGE_NAME}.img --dt ${BIN_DIR}/dt.img
+    else
+      ./release-tools/mkbootimg --cmdline "${KERNEL_CMDLINE} androidboot.selinux=permissive" --base ${KERNEL_BASEADDRESS} --pagesize ${KERNEL_PAGESIZE} --ramdisk_offset ${KERNEL_RAMDISK_OFFSET} --kernel ${BIN_DIR}/kernel --ramdisk ${BIN_DIR}/ramdisk-${IMAGE_NAME}.img --output  ${BIN_DIR}/${IMAGE_NAME}.img
+    fi
     echo "  $BIN_DIR/$IMAGE_NAME.img"
     rm $BIN_DIR/ramdisk-$IMAGE_NAME.img
     rm $BIN_DIR/ramdisk-$IMAGE_NAME.cpio
     rm $BIN_DIR/kernel
+    rm $BIN_DIR/dt.img
 }
 
 make_odin3_image()
@@ -134,6 +148,7 @@ mkdir -p $BIN_DIR
 PREBUILD_IMAGE=./release-tools/$TARGET_DEVICE/prebuild-img/zImage
 echo "use image : ${PREBUILD_IMAGE}"
 cp ${PREBUILD_IMAGE} $BIN_DIR/kernel
+cp release-tools/$TARGET_DEVICE/prebuild-img/dt.img $BIN_DIR/dt.img
 
 # create recovery image
 make_recovery_image
