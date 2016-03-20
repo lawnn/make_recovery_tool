@@ -1,9 +1,16 @@
 #!/bin/bash
 echo "Would you mind picking an Device variant?"
-select choice in
+select choice in sc06d 
 do
 case "$choice" in
-
+	"sc06d")
+                TARGET_DEVICE=SC06D
+                KERNEL_CMDLINE="androidboot.hardware=qcom user_debug=31 zcache androidboot.bootdevice=msm_sdcc.1"
+                KERNEL_BASEADDRESS=0x80200000
+                KERNEL_RAMDISK_OFFSET=0x01500000
+                KERNEL_PAGESIZE=2048
+                IMG_MAX_SIZE=10485760
+		break;;
 
 esac
 done
