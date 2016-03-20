@@ -1,0 +1,20 @@
+###########################################################
+# set android version
+###########################################################
+ANDROID_VERSION=
+
+
+###########################################################
+# set recovery version
+###########################################################
+if [ -f $RAMDISK_SRC_DIR/twres/twrp ]; then
+BUILD_RECOVERY_VER=TWRP-V3.0.0-0
+else
+BUILD_RECOVERY_VER=CW12.1
+fi
+
+
+###########################################################
+# don't edit
+###########################################################
+export BUILD_RECOVERYVERSION="$TARGET_DEVICE-$BUILD_MOD-$BUILD_RECOVERY_VER"
