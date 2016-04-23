@@ -1,6 +1,6 @@
 #!/bin/bash
 echo "Would you mind picking an Device variant?"
-select choice in sc06d sc04f
+select choice in sc06d sc02f
 do
 case "$choice" in
 	"sc06d")
@@ -11,8 +11,8 @@ case "$choice" in
                 KERNEL_PAGESIZE=2048
                 IMG_MAX_SIZE=10485760
 		break;;
-	"sc04f")
-                TARGET_DEVICE=SC04F
+	"sc02f")
+                TARGET_DEVICE=SC02F
                 KERNEL_CMDLINE="console=null androidboot.hardware=qcom user_debug=31 msm_rtb.filter=0x37 ehci-hcd.park=3"
                 KERNEL_BASEADDRESS=0x00000000
                 KERNEL_RAMDISK_OFFSET=0x02000000
@@ -145,7 +145,7 @@ mkdir -p $BIN_DIR
 
 # copy zImage -> kernel
 #REBUILD_IMAGE=./release-tools/$TARGET_DEVICE/stock-img/recovery.img-kernel.gz
-PREBUILD_IMAGE=./release-tools/$TARGET_DEVICE/prebuild-img/zImage
+PREBUILD_IMAGE=./release-tools/$TARGET_DEVICE/prebuild-img/kernel
 echo "use image : ${PREBUILD_IMAGE}"
 cp ${PREBUILD_IMAGE} $BIN_DIR/kernel
 cp release-tools/$TARGET_DEVICE/prebuild-img/dt.img $BIN_DIR/dt.img
